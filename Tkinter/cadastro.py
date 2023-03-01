@@ -2,6 +2,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 import os.path
+import mysql.connector
 
 _script = sys.argv[0]
 
@@ -158,9 +159,24 @@ class Cadastro:
         self.Button1_1.configure(text='''Cadastrar-se''')
         top.mainloop()
 
+    # Inicializando banco de dados
     def cadastro_usuario(self):
-        arquivo = open('usuarios.txt', 'a')
-        arquivo.write(self.Entry1.get())
-        arquivo.write(self.Entry2.get())
-        arquivo.close()
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="cadastrotk"
+        )
+        usuario = self.Entry1.get()
+        senha = self.Entry2.get()
+        mycursor = mydb.cursor()
+
+        query = "INSERT INTO cadastrotk ( email, senha ) " \
+                "VALUES (%s, %s)"
+        values = (str(usuario), str(senha))
+        mycursor.execute(query, values)
+        mydb.commit()
+        mydb.close()
+        mycursor.close()
         self.top.destroy()
+        print(mycursor.rowcount, "registro(s) inserido(s) com sucesso!")

@@ -3,6 +3,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from cadastro import Cadastro
+import mysql.connector
 
 _script = sys.argv[0]
 _location = os.path.dirname(_script)
@@ -146,11 +147,37 @@ class Toplevel1:
         top.mainloop()
 
     def Verificar_login(self):
-        arquivo = open('usuarios.txt', 'r')
 
-        if self.Entry1_login.get() and self.Entry2_cadastro.get() in arquivo.read():
-            print('LOGADO!!')
-        arquivo.close()
+        # Estabelecendo conexão com o banco de dados
+        cnx = mysql.connector.connect(user='root', password='',
+                                      host='localhost',
+                                      database='cadastrotk')
+
+        # Cursor para executar as queries
+        cursor = cnx.cursor()
+
+        # ID do cadastro a ser verificado
+        usuario = self.Entry1_login.get()
+        senha = self.Entry2_cadastro.get()
+
+        # Query que verifica se o cadastro está presente na tabela
+        query = f"SELECT COUNT(*) FROM cadastrotk WHERE email = '{usuario}' and senha = '{senha}'"
+
+        # Executando a query
+        cursor.execute(query)
+
+        # Obtendo o resultado
+        resultado = cursor.fetchone()[0]
+
+        if resultado > 0:
+            print(f"Login Feito com sucesso!!.")
+        else:
+            print(f"Esse usuario não existe!!.")
+
+        # Fechando a conexão e o cursor
+        cursor.close()
+        cnx.close()
+
         self.top.destroy()
 
 
